@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 import joblib
 import pandas as pd
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from src import config
 from src.inference_schema import RiskPrediction, StudentSnapshot
@@ -31,6 +32,12 @@ app = FastAPI(
     description="Predicts day-60 academic risk (Fail/Withdrawn vs Pass/Distinction).",
     version="1.0.0",
     lifespan=lifespan,
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 

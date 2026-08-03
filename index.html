@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EDU-02 · Early Warning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F6F5;
+    --surface:#FFFFFF;
+    --surface-2:#EBEFEE;
+    --ink:#16231F;
+    --muted:#5B6B65;
+    --line:#DCE3E0;
+    --accent:#245B5A;
+    --accent-soft:#E4EDEC;
+    --low:#2F7D5B;
+    --low-soft:#E4F1EA;
+    --medium:#B8862E;
+    --medium-soft:#FBF0DE;
+    --high:#B23B3B;
+    --high-soft:#FBE7E7;
+    --radius:14px;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', system-ui, sans-serif;
+    line-height:1.5;
+    padding:56px 20px 80px;
+  }
+
+  .wrap{ max-width:760px; margin:0 auto; }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:7px; height:7px;
+    border-radius:50%;
+    background:var(--accent);
+    display:inline-block;
+  }
+
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:clamp(30px, 4.6vw, 42px);
+    line-height:1.15;
+    margin:0 0 14px;
+    letter-spacing:-0.01em;
+  }
+
+  .lede{
+    color:var(--muted);
+    font-size:16px;
+    max-width:52ch;
+    margin:0 0 40px;
+  }
+
+  form{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:32px;
+  }
+
+  fieldset{
+    border:none;
+    margin:0 0 30px;
+    padding:0;
+  }
+  fieldset:last-of-type{ margin-bottom:0; }
+
+  legend{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    letter-spacing:.07em;
+    text-transform:uppercase;
+    color:var(--muted);
+    padding:0 0 14px;
+    width:100%;
+    border-bottom:1px solid var(--line);
+    margin-bottom:18px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px 20px;
+  }
+  @media (max-width:600px){ .grid{ grid-template-columns:1fr; } }
+
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field.span2{ grid-column:1 / -1; }
+
+  label{
+    font-size:13px;
+    font-weight:500;
+    color:var(--ink);
+  }
+  label .opt{
+    font-weight:400;
+    color:var(--muted);
+    font-size:12px;
+  }
+
+  select, input{
+    font-family:'Inter', sans-serif;
+    font-size:14.5px;
+    color:var(--ink);
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:10px 12px;
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  select:focus, input:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-soft);
+  }
+
+  .submit-row{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-top:34px;
+  }
+
+  button{
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    color:#fff;
+    background:var(--accent);
+    border:none;
+    border-radius:10px;
+    padding:13px 26px;
+    cursor:pointer;
+    transition:opacity .15s ease, transform .1s ease;
+  }
+  button:hover{ opacity:.92; }
+  button:active{ transform:translateY(1px); }
+  button:disabled{ opacity:.55; cursor:not-allowed; }
+
+  .status{
+    font-size:13.5px;
+    color:var(--muted);
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .status.err{ color:var(--high); }
+
+  /* ---- Result panel ---- */
+  #result{
+    margin-top:28px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:32px;
+    display:none;
+  }
+  #result.show{ display:block; }
+
+  .result-top{
+    display:flex;
+    gap:32px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+
+  .gauge-box{ flex:0 0 220px; }
+
+  .readout{ flex:1; min-width:200px; }
+
+  .band-tag{
+    display:inline-block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:5px 11px;
+    border-radius:999px;
+    margin-bottom:12px;
+  }
+  .band-Low{ background:var(--low-soft); color:var(--low); }
+  .band-Medium{ background:var(--medium-soft); color:var(--medium); }
+  .band-High{ background:var(--high-soft); color:var(--high); }
+
+  .prob{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:44px;
+    font-weight:500;
+    line-height:1;
+    margin:0 0 10px;
+  }
+  .prob span{ font-size:20px; color:var(--muted); }
+
+  .interp{
+    color:var(--muted);
+    font-size:14.5px;
+    max-width:44ch;
+  }
+
+  .needle{ transform-origin:110px 110px; transition:transform .9s cubic-bezier(.2,.9,.25,1); }
+  .needle-hub{ fill:var(--ink); }
+
+  footer{
+    text-align:center;
+    margin-top:40px;
+    color:var(--muted);
+    font-size:12.5px;
+    font-family:'IBM Plex Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="eyebrow">EDU-02 · Day-60 Early Warning</div>
+  <h1>Will this student need support?</h1>
+  <p class="lede">Enter a student's profile and their activity so far. The model looks at engagement through day 60 of the course and estimates the likelihood they'll fail or withdraw.</p>
+
+  <form id="riskForm">
+
+    <fieldset>
+      <legend>Student profile</legend>
+      <div class="grid">
+        <div class="field">
+          <label>Course module</label>
+          <select name="code_module" required>
+            <option value="AAA">AAA</option>
+            <option value="BBB" selected>BBB</option>
+            <option value="CCC">CCC</option>
+            <option value="DDD">DDD</option>
+            <option value="EEE">EEE</option>
+            <option value="FFF">FFF</option>
+            <option value="GGG">GGG</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Presentation term</label>
+          <select name="code_presentation" required>
+            <option value="2013B">2013B</option>
+            <option value="2013J" selected>2013J</option>
+            <option value="2014B">2014B</option>
+            <option value="2014J">2014J</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Gender</label>
+          <select name="gender" required>
+            <option value="F" selected>F</option>
+            <option value="M">M</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Age band</label>
+          <select name="age_band" required>
+            <option value="0-35" selected>0–35</option>
+            <option value="35-55">35–55</option>
+            <option value="55<=">55+</option>
+          </select>
+        </div>
+        <div class="field span2">
+          <label>Region</label>
+          <select name="region" required>
+            <option value="East Anglian Region" selected>East Anglian Region</option>
+            <option value="East Midlands Region">East Midlands Region</option>
+            <option value="Ireland">Ireland</option>
+            <option value="London Region">London Region</option>
+            <option value="North Region">North Region</option>
+            <option value="North Western Region">North Western Region</option>
+            <option value="Scotland">Scotland</option>
+            <option value="South East Region">South East Region</option>
+            <option value="South Region">South Region</option>
+            <option value="South West Region">South West Region</option>
+            <option value="Wales">Wales</option>
+            <option value="West Midlands Region">West Midlands Region</option>
+            <option value="Yorkshire Region">Yorkshire Region</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Highest education</label>
+          <select name="highest_education" required>
+            <option value="No Formal quals">No formal quals</option>
+            <option value="Lower Than A Level">Lower than A Level</option>
+            <option value="A Level or Equivalent" selected>A Level or equivalent</option>
+            <option value="HE Qualification">HE qualification</option>
+            <option value="Post Graduate Qualification">Postgraduate qualification</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Deprivation band <span class="opt">optional</span></label>
+          <select name="imd_band">
+            <option value="">—</option>
+            <option value="0-10%">0–10%</option>
+            <option value="10-20">10–20%</option>
+            <option value="20-30%">20–30%</option>
+            <option value="30-40%" selected>30–40%</option>
+            <option value="40-50%">40–50%</option>
+            <option value="50-60%">50–60%</option>
+            <option value="60-70%">60–70%</option>
+            <option value="70-80%">70–80%</option>
+            <option value="80-90%">80–90%</option>
+            <option value="90-100%">90–100%</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Disability</label>
+          <select name="disability" required>
+            <option value="N" selected>N</option>
+            <option value="Y">Y</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Previous attempts</label>
+          <input type="number" name="num_of_prev_attempts" min="0" value="0" required>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Registration &amp; workload</legend>
+      <div class="grid">
+        <div class="field">
+          <label>Studied credits</label>
+          <input type="number" name="studied_credits" min="0" value="60" required>
+        </div>
+        <div class="field">
+          <label>Registration day <span class="opt">relative to start, optional</span></label>
+          <input type="number" name="date_registration" value="-45">
+        </div>
+        <div class="field">
+          <label>Withdrew before cutoff</label>
+          <select name="withdrawn_before_cutoff" required>
+            <option value="0" selected>No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Engagement through day 60</legend>
+      <div class="grid">
+        <div class="field">
+          <label>Total clicks</label>
+          <input type="number" name="sum_click_total" min="0" step="any" value="820" required>
+        </div>
+        <div class="field">
+          <label>Active days</label>
+          <input type="number" name="n_active_days" min="0" step="any" value="27" required>
+        </div>
+        <div class="field">
+          <label>Early assessments submitted</label>
+          <input type="number" name="n_early_assessments" min="0" step="any" value="2" required>
+        </div>
+        <div class="field">
+          <label>Mean early score <span class="opt">optional</span></label>
+          <input type="number" name="mean_early_score" step="any" value="68.5">
+        </div>
+        <div class="field span2">
+          <label>Minimum early score <span class="opt">optional</span></label>
+          <input type="number" name="min_early_score" step="any" value="55">
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="submit-row">
+      <button type="submit" id="submitBtn">Assess risk</button>
+      <span class="status" id="statusMsg"></span>
+    </div>
+  </form>
+
+  <div id="result">
+    <div class="result-top">
+      <div class="gauge-box">
+        <svg viewBox="0 0 220 130" width="220" height="130">
+          <!-- background arc zones: Low 0-0.3, Medium 0.3-0.6, High 0.6-1.0, mapped over 180deg -->
+          <path d="M 15 110 A 95 95 0 0 1 72 26" fill="none" stroke="var(--low)" stroke-width="14" stroke-linecap="round"/>
+          <path d="M 72 26 A 95 95 0 0 1 148 26" fill="none" stroke="var(--medium)" stroke-width="14" stroke-linecap="round"/>
+          <path d="M 148 26 A 95 95 0 0 1 205 110" fill="none" stroke="var(--high)" stroke-width="14" stroke-linecap="round"/>
+          <g class="needle" id="needle">
+            <line x1="110" y1="110" x2="110" y2="30" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          <circle class="needle-hub" cx="110" cy="110" r="7"/>
+        </svg>
+      </div>
+      <div class="readout">
+        <div class="band-tag" id="bandTag">—</div>
+        <p class="prob" id="probVal">0<span>%</span></p>
+        <p class="interp" id="interpText">Fill in the form and click "Assess risk" to see a prediction.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>Predictions are model estimates, not certainties — use alongside your own judgment.</footer>
+
+</div>
+
+<script>
+  const API_URL = "https://edu02-early-warning.onrender.com/predict";
+  const form = document.getElementById('riskForm');
+  const statusMsg = document.getElementById('statusMsg');
+  const submitBtn = document.getElementById('submitBtn');
+  const result = document.getElementById('result');
+  const needle = document.getElementById('needle');
+  const bandTag = document.getElementById('bandTag');
+  const probVal = document.getElementById('probVal');
+  const interpText = document.getElementById('interpText');
+
+  const interpretations = {
+    Low: "This profile looks on track. No immediate intervention signaled.",
+    Medium: "Some warning signs present. Worth a check-in before day 60 closes out.",
+    High: "Strong risk signal. Recommend reaching out and reviewing support options soon."
+  };
+
+  function setNeedle(prob){
+    // 0 -> -90deg, 1 -> +90deg, sweeping the semicircle
+    const deg = -90 + (prob * 180);
+    needle.style.transform = `rotate(${deg}deg)`;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    statusMsg.classList.remove('err');
+    statusMsg.textContent = "Contacting model — first request can take up to a minute if it's waking up…";
+
+    const fd = new FormData(form);
+    const payload = {};
+    for (const [key, value] of fd.entries()){
+      if (value === ""){ payload[key] = null; continue; }
+      const numericFields = ["num_of_prev_attempts","studied_credits","date_registration",
+        "withdrawn_before_cutoff","sum_click_total","n_active_days","n_early_assessments",
+        "mean_early_score","min_early_score"];
+      payload[key] = numericFields.includes(key) ? Number(value) : value;
+    }
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok){
+        const errBody = await res.text();
+        throw new Error(`Server responded ${res.status}: ${errBody}`);
+      }
+      const data = await res.json();
+
+      const pct = Math.round(data.at_risk_probability * 100);
+      probVal.innerHTML = `${pct}<span>%</span>`;
+      bandTag.textContent = data.risk_band + " risk";
+      bandTag.className = "band-tag band-" + data.risk_band;
+      interpText.textContent = interpretations[data.risk_band] || "";
+      setNeedle(data.at_risk_probability);
+
+      result.classList.add('show');
+      statusMsg.textContent = "";
+    } catch (err) {
+      statusMsg.classList.add('err');
+      statusMsg.textContent = "Couldn't reach the model. " + err.message;
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
